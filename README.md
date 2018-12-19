@@ -9,3 +9,4 @@ Depency:
 - [cdp](https://github.com/mafredri/cdp)
 - [sdump](https://github.com/uobikiemukot/sdump)
 - [tiv](https://github.com/stefanhaustein/TerminalImageViewer)
+- [chrome-launcher](https://github.com/chromedp/launcher)
