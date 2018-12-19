@@ -1,5 +1,5 @@
 # browst
-terminal browser toy, xterm+sixel+gocui+cdp+sdump+tiv
+terminal browser toy, golang+xterm+sixel+gocui+cdp+sdump+tiv
 It is a toy. Browser web page on terminal.
 
 Depency:
