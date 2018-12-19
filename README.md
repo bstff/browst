@@ -1,8 +1,8 @@
 # browst
-terminal browser toy, golang+xterm+sixel+gocui+cdp+sdump+tiv
+Terminal Browser Toy, golang+xterm+sixel+gocui+cdp+sdump+tiv
 It is a toy. Browser web page on terminal.
 
-Depency:
+Depencies:
 - xterm
 - [sixel](https://github.com/saitoha/libsixel)
 - [gocui](https://github.com/jroimartin/gocui)
