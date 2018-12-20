@@ -122,6 +122,7 @@ func (c *Chrome) maybeNavigate(x, y int) bool {
 	l := c.linker
 	urlBefore, err := l.Location(cur)
 	if err != nil {
+		fmt.Println(urlBefore)
 		return false
 	}
 
@@ -140,6 +141,7 @@ func (c *Chrome) maybeNavigate(x, y int) bool {
 	}
 	urlAfter, err := l.Location(cur)
 	if err != nil {
+		fmt.Println(urlAfter)
 		return false
 	}
 	if urlAfter != urlBefore {
@@ -154,11 +156,11 @@ func (c *Chrome) Clicked(col, row, left, top, right, bottom int) int {
 	x := (left + right) / 2
 	y := (top + bottom) / 2
 
-	if c.maybeInput(left, top, right, bottom) {
-		return 2
-	}
 	if c.maybeNavigate(x, y) {
 		return 1
+	}
+	if c.maybeInput(left, top, right, bottom) {
+		return 2
 	}
 
 	return 0
@@ -177,18 +179,20 @@ func (c *Chrome) maybeInput(left, top, right, bottom int) bool {
 		return false
 	}
 
-	// obj, err := l.ResolveNode(cur, NodeID, -1)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return false
-	// }
-	// fmt.Println(*obj.Description)
-
-	nodeAttributes, err := l.NodeAttributes(cur, int(NodeID))
+	node, err := l.DescribeNode(cur, NodeID, BackendNodeID)
 	if err != nil {
+		fmt.Println(err)
 		return false
 	}
-	inputType := common.Attribute(nodeAttributes, "type")
+	if node.NodeName != "INPUT" {
+		return false
+	}
+
+	// nodeAttributes, err := l.NodeAttributes(cur, int(NodeID))
+	// if err != nil {
+	// 	return false
+	// }
+	inputType := common.Attribute(node.Attributes, "type")
 	if inputType != "" && inputType != "text" {
 		return false
 	}
