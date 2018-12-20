@@ -3,6 +3,7 @@ package remoteChrome
 import (
 	"browst/launcher"
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/mafredri/cdp"
@@ -101,7 +102,7 @@ func (l *Linker) Close() {
 func launchChrome(port int, ctxt context.Context) {
 	launcher.Run(ctxt,
 		launcher.ExecPath("/usr/local/bin/chrome"),
-		launcher.Flag("headless", true),
+		// launcher.Flag("headless", true),
 		launcher.Flag("no-first-run", true),
 		launcher.Flag("no-default-browser-check", true),
 		launcher.Flag("disable-gpu", true),
@@ -320,11 +321,11 @@ func (l *Linker) SelectNodes(c *cdp.Client, sel string) ([]dom.NodeID, error) {
 	return reply.NodeIDs, err
 }
 
-func (l *Linker) NodeAttributes(c *cdp.Client, id dom.NodeID) ([]string, error) {
+func (l *Linker) NodeAttributes(c *cdp.Client, id int) ([]string, error) {
 	ctxt := l.ctxt
 
 	reply, err := c.DOM.GetAttributes(ctxt,
-		dom.NewGetAttributesArgs(id))
+		dom.NewGetAttributesArgs(dom.NodeID(id)))
 
 	return reply.Attributes, err
 }
@@ -369,10 +370,29 @@ func (l *Linker) ResolveNode(c *cdp.Client,
 	return reply.Object, err
 }
 
-func (l *Linker) SetAttributeValue(c *cdp.Client, id dom.NodeID, name, value string) error {
+func (l *Linker) SetAttributeValue(c *cdp.Client, id int, name, value string) error {
 
 	ctxt := l.ctxt
 
 	return c.DOM.SetAttributeValue(ctxt,
-		dom.NewSetAttributeValueArgs(id, name, value))
+		dom.NewSetAttributeValueArgs(dom.NodeID(id), name, value))
+}
+
+func (l *Linker) Location(c *cdp.Client) (string, error) {
+	ctxt := l.ctxt
+
+	expression := `document.location.toString()`
+	evalArgs :=
+		runtime.NewEvaluateArgs(expression).SetAwaitPromise(true).SetReturnByValue(true)
+	reply, err := c.Runtime.Evaluate(ctxt, evalArgs)
+	if err != nil {
+		return "", err
+	}
+
+	var url string
+	if err = json.Unmarshal(reply.Result.Value, &url); err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	return url, nil
 }

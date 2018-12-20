@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/mafredri/cdp"
-	"github.com/mafredri/cdp/protocol/dom"
 
+	// "io/ioutil"
 	"time"
 )
 
@@ -120,18 +120,30 @@ func (c *Chrome) RunScreenshot2File(
 
 func (c *Chrome) maybeNavigate(x, y int) bool {
 	l := c.linker
-
-	err := l.MouseClickXY(cur, x, y)
+	urlBefore, err := l.Location(cur)
 	if err != nil {
 		return false
 	}
 
-	url, err := c.maybeTargetURL()
+	err = l.MouseClickXY(cur, x, y)
+	if err != nil {
+		return false
+	}
+
+	url, err := c.maybeNewTarget()
 	if err != nil {
 		return false
 	}
 	if len(url) > 0 {
 		c.Navigate(url)
+		return true
+	}
+	urlAfter, err := l.Location(cur)
+	if err != nil {
+		return false
+	}
+	if urlAfter != urlBefore {
+		c.Navigate(urlAfter)
 		return true
 	}
 	return false
@@ -142,16 +154,17 @@ func (c *Chrome) Clicked(col, row, left, top, right, bottom int) int {
 	x := (left + right) / 2
 	y := (top + bottom) / 2
 
-	if c.maybeNavigate(x, y) {
-		return 1
-	}
 	if c.maybeInput(left, top, right, bottom) {
 		return 2
 	}
+	if c.maybeNavigate(x, y) {
+		return 1
+	}
+
 	return 0
 }
 
-func (c *Chrome) isInputNode(left, top, right, bottom int) dom.NodeID {
+func (c *Chrome) maybeInput(left, top, right, bottom int) bool {
 	l := c.linker
 
 	x := (left + right) / 2
@@ -159,57 +172,54 @@ func (c *Chrome) isInputNode(left, top, right, bottom int) dom.NodeID {
 
 	NodeID, BackendNodeID, err := l.NodeForLocation(cur, x, y)
 	if err != nil {
-		return -1
+		fmt.Println("can't click input")
+		fmt.Println(BackendNodeID)
+		return false
 	}
 
-	node, err := l.DescribeNode(cur, NodeID, BackendNodeID)
+	// obj, err := l.ResolveNode(cur, NodeID, -1)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return false
+	// }
+	// fmt.Println(*obj.Description)
+
+	nodeAttributes, err := l.NodeAttributes(cur, int(NodeID))
 	if err != nil {
-		return -1
+		return false
 	}
-	if node.NodeName != "INPUT" {
-		return -1
-	}
-
-	inputType := common.Attribute(node.Attributes, "type")
-	if inputType == "" || inputType == "text" {
-		return NodeID
-	}
-
-	return -1
-}
-
-func (c *Chrome) maybeInput(left, top, right, bottom int) bool {
-	if -1 == c.isInputNode(left, top, right, bottom) {
+	inputType := common.Attribute(nodeAttributes, "type")
+	if inputType != "" && inputType != "text" {
 		return false
 	}
 
 	ev := common.Event{
 		ID: common.WaitInput,
 		Payload: common.Region{
-			Left:   left,
-			Top:    top,
-			Right:  right,
-			Bottom: bottom,
+			X: int(NodeID),
 		},
 	}
 	wait(ev)
 
-	// l.SetAttributeValue(cur, NodeID, "value", "any")
-
 	return true
 }
 
-func (c *Chrome) ABSInput(value string, left, top, right, bottom int) bool {
+func (c *Chrome) ABSInput(value string, id int) bool {
 	l := c.linker
 
-	NodeID := c.isInputNode(left, top, right, bottom)
-	if int(NodeID) == -1 {
-		fmt.Println("absinput no node")
+	err := l.SetAttributeValue(cur, id, "value", value)
+	if err != nil {
+		fmt.Println(err)
 		return false
 	}
 
-	if l.SetAttributeValue(cur, NodeID, "value", value) != nil {
-		return false
-	}
+	// nodeAttributes, err := l.NodeAttributes(cur, id)
+	// if err != nil {
+	// 	return false
+	// }
+	// inputType := common.Attribute(nodeAttributes, "value")
+	// path := "log.txt"
+	// ioutil.WriteFile(path, []byte(inputType), 0644)
+
 	return true
 }

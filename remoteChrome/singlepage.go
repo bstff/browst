@@ -26,7 +26,7 @@ func (b *Chrome) keepTarget() error {
 	return nil
 }
 
-func (b *Chrome) maybeTargetURL() (string, error) {
+func (b *Chrome) maybeNewTarget() (string, error) {
 	l := b.linker
 
 	url := ""

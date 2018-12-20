@@ -38,10 +38,7 @@ var (
 	renderYMax = 0
 
 	waitInput = false
-	waitPosL  = 0
-	waitPosT  = 0
-	waitPosR  = 0
-	waitPosB  = 0
+	nodeID    = -1
 )
 
 func SetHandlerInputFunc(handler HandlerInput) {
@@ -56,17 +53,14 @@ func sixelCropPrint(img_data []byte, l, t, r, b int) {
 	fmt.Print(cursorTo, string(buf))
 }
 
-func waitInputOrNot(i bool, l, t, r, b int) {
+func waitInputOrNot(i bool, id int) {
 	waitInput = i
 
-	waitPosL = l
-	waitPosT = t
-	waitPosR = r
-	waitPosB = b
+	nodeID = id
 }
 
-func WaitInput(l, t, r, b int) {
-	waitInputOrNot(true, l, t, r, b)
+func WaitInput(id int) {
+	waitInputOrNot(true, id)
 	switchView(tui, inputView, true)
 }
 
@@ -167,14 +161,11 @@ func input(g *gocui.Gui, v *gocui.View) error {
 		ev = common.Event{
 			ID: common.InputWaited,
 			Payload: common.Region{
-				Cont:   []byte(vbuf),
-				Left:   waitPosL,
-				Top:    waitPosT,
-				Right:  waitPosR,
-				Bottom: waitPosB,
+				Cont: []byte(vbuf),
+				X:    nodeID,
 			},
 		}
-		waitInputOrNot(false, 0, 0, 0, 0)
+		waitInputOrNot(false, -1)
 
 	} else {
 		if strings.Index(vbuf, "http://") != 0 {
