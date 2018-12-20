@@ -9,7 +9,7 @@ var (
 	onlyTarget *devtool.Target = nil
 )
 
-func (b *Chrome) saveSingleTargetID() error {
+func (b *Chrome) keepTarget() error {
 	l := b.linker
 
 	targets, err := l.DVTListPageTargets()

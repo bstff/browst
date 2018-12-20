@@ -29,7 +29,7 @@ func layout(g *gocui.Gui) error {
 		}
 		v.Editable = true
 		v.Wrap = true
-
 	}
+
 	return nil
 }

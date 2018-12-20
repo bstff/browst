@@ -101,7 +101,7 @@ func (l *Linker) Close() {
 func launchChrome(port int, ctxt context.Context) {
 	launcher.Run(ctxt,
 		launcher.ExecPath("/usr/local/bin/chrome"),
-		// launcher.Flag("headless", true),
+		launcher.Flag("headless", true),
 		launcher.Flag("no-first-run", true),
 		launcher.Flag("no-default-browser-check", true),
 		launcher.Flag("disable-gpu", true),
@@ -157,44 +157,6 @@ func (l *Linker) Screenshot2File(c *cdp.Client, path string) error {
 
 	err = ioutil.WriteFile(path, buf, 0644)
 	return err
-}
-
-func (l *Linker) SelectNodes(c *cdp.Client, sel string) ([]dom.NodeID, error) {
-	ctxt := l.ctxt
-
-	doc, err := c.DOM.GetDocument(ctxt, nil)
-	if err != nil {
-		return nil, err
-	}
-	reply, err := c.DOM.QuerySelectorAll(ctxt,
-		dom.NewQuerySelectorAllArgs(doc.Root.NodeID, sel))
-
-	return reply.NodeIDs, err
-}
-
-func (l *Linker) NodeAttributes(c *cdp.Client, id dom.NodeID) ([]string, error) {
-	ctxt := l.ctxt
-
-	reply, err := c.DOM.GetAttributes(ctxt,
-		dom.NewGetAttributesArgs(id))
-
-	return reply.Attributes, err
-}
-
-func (l *Linker) NodeBoxModel(c *cdp.Client, id dom.NodeID) (dom.BoxModel, error) {
-	ctxt := l.ctxt
-
-	reply, err := c.DOM.GetBoxModel(ctxt,
-		dom.NewGetBoxModelArgs().SetNodeID(id))
-
-	return reply.Model, err
-
-	// rect := domRect{
-	// 	int(boxmodel.Model.Margin[0]),
-	// 	int(boxmodel.Model.Margin[1]),
-	// 	int(boxmodel.Model.Margin[4]),
-	// 	int(boxmodel.Model.Margin[5]),
-	// }
 }
 
 func (l *Linker) ListAllTargets(c *cdp.Client) ([]target.Info, error) {
@@ -277,8 +239,9 @@ func (l *Linker) DVTCloseTarget(target *devtool.Target) error {
 func (l *Linker) MouseClickXY(c *cdp.Client, x, y int) error {
 	ctxt := l.ctxt
 
-	pressLeft := input.NewDispatchMouseEventArgs("mousePressed", float64(x), float64(y)).
-		SetButton("left").SetClickCount(1)
+	pressLeft :=
+		input.NewDispatchMouseEventArgs("mousePressed", float64(x), float64(y)).
+			SetButton("left").SetClickCount(1)
 
 	err := c.Input.DispatchMouseEvent(ctxt, pressLeft)
 	if err != nil {
@@ -291,8 +254,9 @@ func (l *Linker) MouseClickXY(c *cdp.Client, x, y int) error {
 func (l *Linker) releaseMouse(c *cdp.Client, btn string, x, y int) error {
 	ctxt := l.ctxt
 
-	release := input.NewDispatchMouseEventArgs("mouseReleased", float64(x), float64(y)).
-		SetButton(btn)
+	release :=
+		input.NewDispatchMouseEventArgs("mouseReleased", float64(x), float64(y)).
+			SetButton(btn)
 
 	return c.Input.DispatchMouseEvent(ctxt, release)
 }
@@ -306,11 +270,109 @@ func (l *Linker) MouseWheel(c *cdp.Client, delta int) error {
 	})(%d, %d)`
 
 	expression := fmt.Sprintf(scrollJS, scrollX, scrollY+delta)
-	evalArgs := runtime.NewEvaluateArgs(expression).SetAwaitPromise(true).SetReturnByValue(true)
+	evalArgs :=
+		runtime.NewEvaluateArgs(expression).SetAwaitPromise(true).SetReturnByValue(true)
 	_, err := c.Runtime.Evaluate(ctxt, evalArgs)
 	if err != nil {
 		return err
 	}
 	scrollY += delta
 	return l.releaseMouse(c, "middle", 0, delta)
+}
+
+func (l *Linker) NodeForLocation(c *cdp.Client,
+	x, y int) (dom.NodeID, dom.BackendNodeID, error) {
+	ctxt := l.ctxt
+
+	reply, err := c.DOM.GetNodeForLocation(ctxt, dom.NewGetNodeForLocationArgs(x, y))
+
+	return *reply.NodeID, reply.BackendNodeID, err
+}
+
+func (l *Linker) DescribeNode(c *cdp.Client,
+	nodeID dom.NodeID,
+	backendNodeID dom.BackendNodeID) (dom.Node, error) {
+
+	ctxt := l.ctxt
+	desc := dom.NewDescribeNodeArgs()
+	if nodeID > 0 {
+		desc.SetNodeID(nodeID)
+	}
+	if backendNodeID > 0 {
+		desc.SetBackendNodeID(backendNodeID)
+	}
+
+	reply, err := c.DOM.DescribeNode(ctxt, desc)
+
+	return reply.Node, err
+}
+
+func (l *Linker) SelectNodes(c *cdp.Client, sel string) ([]dom.NodeID, error) {
+	ctxt := l.ctxt
+
+	doc, err := c.DOM.GetDocument(ctxt, nil)
+	if err != nil {
+		return nil, err
+	}
+	reply, err := c.DOM.QuerySelectorAll(ctxt,
+		dom.NewQuerySelectorAllArgs(doc.Root.NodeID, sel))
+
+	return reply.NodeIDs, err
+}
+
+func (l *Linker) NodeAttributes(c *cdp.Client, id dom.NodeID) ([]string, error) {
+	ctxt := l.ctxt
+
+	reply, err := c.DOM.GetAttributes(ctxt,
+		dom.NewGetAttributesArgs(id))
+
+	return reply.Attributes, err
+}
+
+func (l *Linker) NodeBoxModel(c *cdp.Client,
+	id dom.NodeID,
+	backendNodeID dom.BackendNodeID) (dom.BoxModel, error) {
+
+	ctxt := l.ctxt
+	boxmodel := dom.NewGetBoxModelArgs()
+	if id > 0 {
+		boxmodel.SetNodeID(id)
+	}
+	if backendNodeID > 0 {
+		boxmodel.SetBackendNodeID(backendNodeID)
+	}
+	reply, err := c.DOM.GetBoxModel(ctxt, boxmodel)
+
+	return reply.Model, err
+
+	// rect := domRect{
+	// 	int(boxmodel.Model.Margin[0]),
+	// 	int(boxmodel.Model.Margin[1]),
+	// 	int(boxmodel.Model.Margin[4]),
+	// 	int(boxmodel.Model.Margin[5]),
+	// }
+}
+
+func (l *Linker) ResolveNode(c *cdp.Client,
+	id dom.NodeID,
+	backendNodeID dom.BackendNodeID) (runtime.RemoteObject, error) {
+
+	ctxt := l.ctxt
+	resolve := dom.NewResolveNodeArgs()
+	if id > 0 {
+		resolve.SetNodeID(id)
+	}
+	if backendNodeID > 0 {
+		resolve.SetBackendNodeID(backendNodeID)
+	}
+	reply, err := c.DOM.ResolveNode(ctxt, resolve)
+	return reply.Object, err
+}
+
+func (l *Linker) SetAttributeValue(c *cdp.Client, id dom.NodeID, name, value string) error {
+
+	ctxt := l.ctxt
+
+	return c.DOM.SetAttributeValue(ctxt,
+		dom.NewSetAttributeValueArgs(id, name, value))
 }
