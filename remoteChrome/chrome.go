@@ -199,8 +199,8 @@ func (c *Chrome) maybeInput(left, top, right, bottom int) bool {
 
 	ev := common.Event{
 		ID: common.WaitInput,
-		Payload: common.Region{
-			X: int(NodeID),
+		Payload: common.BuffWaited{
+			ID: int(NodeID),
 		},
 	}
 	wait(ev)

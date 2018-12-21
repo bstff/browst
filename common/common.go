@@ -27,7 +27,11 @@ type Region struct {
 	Top    int
 	Right  int
 	Bottom int
-	Cont   []byte
+}
+
+type BuffWaited struct {
+	ID   int
+	Cont []byte
 }
 
 func DeletePNG(pathname string) {

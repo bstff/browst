@@ -160,9 +160,9 @@ func input(g *gocui.Gui, v *gocui.View) error {
 	if waitInput {
 		ev = common.Event{
 			ID: common.InputWaited,
-			Payload: common.Region{
+			Payload: common.BuffWaited{
 				Cont: []byte(vbuf),
-				X:    nodeID,
+				ID:   nodeID,
 			},
 		}
 		waitInputOrNot(false, -1)

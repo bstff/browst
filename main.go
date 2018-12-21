@@ -74,16 +74,16 @@ func handlerUIEvent(b *remoteChrome.Chrome, ev common.Event) {
 		r := ev.Payload.(common.Region)
 		b.Wheel(r.Y)
 	case common.InputWaited:
-		r := ev.Payload.(common.Region)
+		r := ev.Payload.(common.BuffWaited)
 		content := string(r.Cont)
-		b.ABSInput(content, r.X)
+		b.ABSInput(content, r.ID)
 	}
 }
 
 func handlerChromeEvent(ev common.Event) {
 	switch ev.ID {
 	case common.WaitInput:
-		r := ev.Payload.(common.Region)
-		ui.WaitInput(r.X)
+		r := ev.Payload.(common.BuffWaited)
+		ui.WaitInput(r.ID)
 	}
 }
