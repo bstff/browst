@@ -82,9 +82,11 @@ func (c *Chrome) RunScreenshot2Data(quit chan struct{}, ch chan []byte, delay in
 		for {
 			select {
 			case <-quit:
-				break
+				return
 			default:
 				buf, err := l.Screenshot2Data(cur)
+				// ioutil.WriteFile("scr.png", buf, 0644)
+
 				if err == nil {
 					ch <- buf
 				}
@@ -106,7 +108,7 @@ func (c *Chrome) RunScreenshot2File(
 		for {
 			select {
 			case <-quit:
-				break
+				return
 			default:
 				err := l.Screenshot2File(cur, path)
 				if err == nil {
