@@ -15,12 +15,6 @@ var (
 	screenshot_data = make(chan []byte)
 )
 
-func startScreenshot(b *remoteChrome.Chrome) {
-	close(screenshot_quit)
-	screenshot_quit = make(chan struct{})
-	b.RunScreenshot2Data(screenshot_quit, screenshot_data, 38)
-}
-
 func runCDP() {
 
 	b := remoteChrome.NewWithViewSize(9223, width, height)
@@ -34,7 +28,8 @@ func runCDP() {
 	// url := `https://www.2345.com/?39291`
 	b.Start(url)
 
-	startScreenshot(b)
+	screenshot_quit = make(chan struct{})
+	b.RunScreenshot2Data(screenshot_quit, screenshot_data, 38)
 
 	ui.SetHandlerInputFunc(func(ev common.Event) {
 		handlerUIEvent(b, ev)
@@ -54,7 +49,7 @@ func main() {
 func handleClickEvent(b *remoteChrome.Chrome, ret int) {
 	switch ret {
 	case 1:
-		startScreenshot(b)
+		// startScreenshot(b)
 	default:
 		break
 	}
