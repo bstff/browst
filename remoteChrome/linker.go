@@ -399,3 +399,29 @@ func (l *Linker) Location(c *cdp.Client) (string, error) {
 	}
 	return url, nil
 }
+
+func (l *Linker) EventFrameNavigated(c *cdp.Client) (*page.Frame, error) {
+	ctxt := l.ctxt
+
+	frameNavigated, err := c.Page.FrameNavigated(ctxt)
+	if err != nil {
+		return nil, err
+	}
+	defer frameNavigated.Close()
+
+	var frame *page.Frame = nil
+loop:
+	for {
+		select {
+		case <-frameNavigated.Ready():
+			reply, _ := frameNavigated.Recv()
+			if err == nil {
+				frame = &reply.Frame
+			}
+			break loop
+		default:
+			time.After(6 * time.Second)
+		}
+	}
+	return frame, nil
+}

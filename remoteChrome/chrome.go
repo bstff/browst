@@ -54,6 +54,7 @@ func (c *Chrome) Start(url string) {
 	if err != nil {
 		fmt.Println(err)
 	}
+
 }
 
 func (c *Chrome) Navigate(url string) error {
@@ -66,7 +67,18 @@ func (c *Chrome) Navigate(url string) error {
 		cur = c
 	}
 
-	return l.Navigate(cur, url)
+	err := l.Navigate(cur, url)
+	if err != nil {
+		return err
+	}
+
+	// frame, err := l.EventFrameNavigated(cur)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	fmt.Println(frame)
+	// }
+
+	return err
 }
 
 func (c *Chrome) Wheel(delta int) error {
