@@ -17,6 +17,9 @@ type WaitInput func(ev common.Event)
 var (
 	cur  *cdp.Client = nil
 	wait WaitInput
+
+	scrollX = 0
+	scrollY = 50
 )
 
 type Chrome struct {
@@ -82,10 +85,19 @@ func (c *Chrome) Navigate(url string) error {
 	return err
 }
 
+func (c *Chrome) PageReset() {
+	l := c.linker
+
+	scrollY = 0
+	l.MouseWheel(cur, scrollX, scrollY)
+}
+
 func (c *Chrome) Wheel(delta int) error {
 	l := c.linker
 
-	return l.MouseWheel(cur, delta)
+	scrollY += delta
+
+	return l.MouseWheel(cur, scrollX, scrollY)
 }
 
 func (c *Chrome) RunScreenshot2Data(quit chan struct{}, ch chan []byte, delay int) {

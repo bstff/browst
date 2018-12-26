@@ -22,9 +22,6 @@ import (
 var (
 	viewWidth  = 720
 	viewHeight = 640
-
-	scrollX = 0
-	scrollY = 50
 )
 
 type Linker struct {
@@ -102,7 +99,7 @@ func (l *Linker) Close() {
 func launchChrome(port int, ctxt context.Context) {
 	launcher.Run(ctxt,
 		launcher.ExecPath("/usr/local/bin/chrome"),
-		// launcher.Flag("headless", true),
+		launcher.Flag("headless", true),
 		launcher.Flag("no-first-run", true),
 		launcher.Flag("no-default-browser-check", true),
 		launcher.Flag("disable-gpu", true),
@@ -262,7 +259,7 @@ func (l *Linker) releaseMouse(c *cdp.Client, btn string, x, y int) error {
 	return c.Input.DispatchMouseEvent(ctxt, release)
 }
 
-func (l *Linker) MouseWheel(c *cdp.Client, delta int) error {
+func (l *Linker) MouseWheel(c *cdp.Client, x, y int) error {
 	ctxt := l.ctxt
 
 	scrollJS := `(function(x, y) {
@@ -270,15 +267,14 @@ func (l *Linker) MouseWheel(c *cdp.Client, delta int) error {
 		return [window.scrollX, window.scrollY];
 	})(%d, %d)`
 
-	expression := fmt.Sprintf(scrollJS, scrollX, scrollY+delta)
+	expression := fmt.Sprintf(scrollJS, x, y)
 	evalArgs :=
 		runtime.NewEvaluateArgs(expression).SetAwaitPromise(true).SetReturnByValue(true)
 	_, err := c.Runtime.Evaluate(ctxt, evalArgs)
 	if err != nil {
 		return err
 	}
-	scrollY += delta
-	return l.releaseMouse(c, "middle", 0, delta)
+	return l.releaseMouse(c, "middle", 0, 0)
 }
 
 func (l *Linker) NodeForLocation(c *cdp.Client,

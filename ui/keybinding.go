@@ -49,6 +49,13 @@ func kbrender(g *gocui.Gui) error {
 		return err
 	}
 
+	if err := g.SetKeybinding(renderView, gocui.KeyHome, gocui.ModNone,
+		func(g *gocui.Gui, v *gocui.View) error {
+			return renderViewReset(g, v)
+		}); err != nil {
+		return err
+	}
+
 	return nil
 }
 

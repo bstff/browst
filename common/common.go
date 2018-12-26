@@ -13,6 +13,8 @@ const (
 
 	WaitInput   = "wait"
 	InputWaited = "waited"
+
+	PageReset = "reset"
 )
 
 type Event struct {

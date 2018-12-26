@@ -61,13 +61,19 @@ func handlerUIEvent(b *remoteChrome.Chrome, ev common.Event) {
 		url := ev.Payload.(string)
 		// fmt.Print(url)
 		b.Navigate(url)
+
 	case common.InputMouseClick:
 		r := ev.Payload.(common.Region)
 		ret := b.Clicked(r.X, r.Y, r.Left, r.Top, r.Right, r.Bottom)
 		handleClickEvent(b, ret)
+
 	case common.InputMouseWheel:
 		r := ev.Payload.(common.Region)
 		b.Wheel(r.Y)
+
+	case common.PageReset:
+		b.PageReset()
+
 	case common.InputWaited:
 		r := ev.Payload.(common.BuffWaited)
 		content := string(r.Cont)

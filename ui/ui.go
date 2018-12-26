@@ -186,6 +186,19 @@ func input(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func renderViewReset(g *gocui.Gui, v *gocui.View) error {
+	if waitInput {
+		return nil
+	}
+
+	ev := common.Event{
+		ID: common.PageReset,
+	}
+
+	handlerFunc(ev)
+	return nil
+}
+
 func moveRenderView(g *gocui.Gui, v *gocui.View, dx, dy int) error {
 	if waitInput {
 		return nil
