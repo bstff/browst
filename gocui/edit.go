@@ -4,6 +4,7 @@
 
 package gocui
 
+import "github.com/mattn/go-runewidth"
 import "errors"
 
 const maxInt = int(^uint(0) >> 1)
@@ -55,7 +56,8 @@ func simpleEditor(v *View, key Key, ch rune, mod Modifier) {
 // EditWrite writes a rune at the cursor position.
 func (v *View) EditWrite(ch rune) {
 	v.writeRune(v.cx, v.cy, ch)
-	v.MoveCursor(1, 0, true)
+	x := runewidth.RuneWidth(ch)
+	v.MoveCursor(x, 0, true)
 }
 
 // EditDelete deletes a rune at the cursor position. back determines the

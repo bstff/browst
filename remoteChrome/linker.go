@@ -102,7 +102,7 @@ func (l *Linker) Close() {
 func launchChrome(port int, ctxt context.Context) {
 	launcher.Run(ctxt,
 		launcher.ExecPath("/usr/local/bin/chrome"),
-		launcher.Flag("headless", true),
+		// launcher.Flag("headless", true),
 		launcher.Flag("no-first-run", true),
 		launcher.Flag("no-default-browser-check", true),
 		launcher.Flag("disable-gpu", true),

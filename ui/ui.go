@@ -94,7 +94,7 @@ func updateView(g *gocui.Gui, ch chan []byte) {
 func Run(ch chan []byte, w, h int) {
 	imgWidth, imgHeight = w, h
 
-	g, err := gocui.NewGui(gocui.OutputNormal)
+	g, err := gocui.NewGui(gocui.Output256)
 	if err != nil {
 		log.Panicln(err)
 	}

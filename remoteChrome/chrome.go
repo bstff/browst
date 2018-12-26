@@ -8,6 +8,7 @@ import (
 	"github.com/mafredri/cdp"
 
 	// "io/ioutil"
+	"strings"
 	"time"
 )
 
@@ -224,6 +225,8 @@ func (c *Chrome) maybeInput(left, top, right, bottom int) bool {
 
 func (c *Chrome) ABSInput(value string, id int) bool {
 	l := c.linker
+
+	value = strings.Replace(value, " ", "", -1)
 
 	err := l.SetAttributeValue(cur, id, "value", value)
 	if err != nil {
