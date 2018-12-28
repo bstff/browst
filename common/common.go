@@ -71,14 +71,11 @@ func InRect(x, y, l, t, r, b int) bool {
 	return false
 }
 
-func LooseCrossRect(l1, t1, r1, b1, l2, t2, r2, b2 int) bool {
+func CenterInRect(l1, t1, r1, b1, l2, t2, r2, b2 int) bool {
 	centerX := (l1 + r1) / 2
 	centerY := (t1 + b1) / 2
 
-	if (centerX > l2 && centerX < r2) || (centerY > t2 && centerY < b2) {
-		return true
-	}
-	return false
+	return InRect(centerX, centerY, l2, t2, r2, b2)
 }
 
 func CrossRect(l1, t1, r1, b1, l2, t2, r2, b2 int) bool {
