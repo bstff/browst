@@ -71,13 +71,17 @@ func handlerUIEvent(b *remoteChrome.Chrome, ev common.Event) {
 		r := ev.Payload.(common.Region)
 		b.Wheel(r.Y)
 
-	case common.PageReset:
-		b.PageReset()
+	case common.Page2Top:
+		b.Page2Top()
 
 	case common.InputWaited:
 		r := ev.Payload.(common.BuffWaited)
 		content := string(r.Cont)
 		b.ABSInput(content, r.ID)
+
+	case common.NaviHist:
+		r := ev.Payload.(common.Region)
+		b.NavigateHistory(r.Y)
 	}
 }
 

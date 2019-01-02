@@ -20,6 +20,8 @@ var (
 
 	scrollX = 0
 	scrollY = 50
+
+	curFrame = 0
 )
 
 type Chrome struct {
@@ -85,7 +87,7 @@ func (c *Chrome) Navigate(url string) error {
 	return err
 }
 
-func (c *Chrome) PageReset() {
+func (c *Chrome) Page2Top() {
 	l := c.linker
 
 	scrollY = 0
@@ -238,7 +240,7 @@ func (c *Chrome) maybeInput(left, top, right, bottom int) bool {
 func (c *Chrome) ABSInput(value string, id int) bool {
 	l := c.linker
 
-	value = strings.Replace(value, " ", "", -1)
+	// value = strings.Replace(value, " ", "", -1)
 
 	err := l.SetAttributeValue(cur, id, "value", value)
 	if err != nil {
@@ -255,4 +257,20 @@ func (c *Chrome) ABSInput(value string, id int) bool {
 	// ioutil.WriteFile(path, []byte(inputType), 0644)
 
 	return true
+}
+
+func (c *Chrome) NavigateHistory(flag int) error {
+	l := c.linker
+
+	// if flag > 0 {
+	// 	return l.NavigateForward(cur)
+	// }
+	// if flag < 0 {
+	// 	return l.NavigateBack(cur)
+	// }
+
+	err := l.CircleNavigate(cur, &curFrame)
+	curFrame++
+
+	return err
 }

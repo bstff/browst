@@ -421,3 +421,64 @@ loop:
 	}
 	return frame, nil
 }
+
+func (l *Linker) NavigateBack(c *cdp.Client) error {
+	ctxt := l.ctxt
+
+	reply, err := c.Page.GetNavigationHistory(ctxt)
+
+	if err != nil {
+		return err
+	}
+	count := len(reply.Entries)
+	if reply.CurrentIndex <= 0 || reply.CurrentIndex > count-1 {
+		return fmt.Errorf("invalid navigation entry")
+	}
+
+	return c.Page.NavigateToHistoryEntry(ctxt,
+		page.NewNavigateToHistoryEntryArgs(reply.CurrentIndex-1))
+
+}
+
+func (l *Linker) NavigateForward(c *cdp.Client) error {
+	ctxt := l.ctxt
+
+	reply, err := c.Page.GetNavigationHistory(ctxt)
+
+	if err != nil {
+		return err
+	}
+	count := len(reply.Entries)
+	if reply.CurrentIndex <= 0 || reply.CurrentIndex > count-1 {
+		return fmt.Errorf("invalid navigation entry")
+	}
+
+	return c.Page.NavigateToHistoryEntry(ctxt,
+		page.NewNavigateToHistoryEntryArgs(reply.CurrentIndex+1))
+
+}
+
+func (l *Linker) CircleNavigate(c *cdp.Client, index *int) error {
+	ctxt := l.ctxt
+
+	reply, err := c.Page.GetNavigationHistory(ctxt)
+
+	if err != nil {
+		return err
+	}
+	count := len(reply.Entries)
+	if count == 2 && reply.Entries[0].URL == "about:blank" {
+		return nil
+	}
+
+	if *index >= count {
+		*index = 0
+	}
+
+	url := reply.Entries[*index].URL
+	if url == "about:blank" {
+		*index++
+		url = reply.Entries[*index].URL
+	}
+	return l.Navigate(c, url)
+}

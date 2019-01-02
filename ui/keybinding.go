@@ -42,6 +42,12 @@ func kbrender(g *gocui.Gui) error {
 		}); err != nil {
 		return err
 	}
+	if err := g.SetKeybinding(renderView, gocui.KeySpace, gocui.ModNone,
+		func(g *gocui.Gui, v *gocui.View) error {
+			return moveRenderView(g, v, 0, viewMoveDelta)
+		}); err != nil {
+		return err
+	}
 	if err := g.SetKeybinding(renderView, gocui.KeyArrowUp, gocui.ModNone,
 		func(g *gocui.Gui, v *gocui.View) error {
 			return moveRenderView(g, v, 0, -viewMoveDelta)
@@ -56,6 +62,18 @@ func kbrender(g *gocui.Gui) error {
 		return err
 	}
 
+	if err := g.SetKeybinding(renderView, gocui.KeyCtrlZ, gocui.ModNone,
+		func(g *gocui.Gui, v *gocui.View) error {
+			return goHistory(g, v, -viewMoveDelta)
+		}); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding(renderView, gocui.KeyCtrlX, gocui.ModNone,
+		func(g *gocui.Gui, v *gocui.View) error {
+			return goHistory(g, v, viewMoveDelta)
+		}); err != nil {
+		return err
+	}
 	return nil
 }
 

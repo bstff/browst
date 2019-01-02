@@ -192,7 +192,7 @@ func renderViewReset(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	ev := common.Event{
-		ID: common.PageReset,
+		ID: common.Page2Top,
 	}
 
 	handlerFunc(ev)
@@ -228,6 +228,19 @@ func moveRenderView(g *gocui.Gui, v *gocui.View, dx, dy int) error {
 		handlerFunc(ev)
 
 	}
+
+	return nil
+}
+
+func goHistory(g *gocui.Gui, v *gocui.View, flag int) error {
+	ev := common.Event{
+		ID: common.NaviHist,
+		Payload: common.Region{
+			Y: flag,
+		},
+	}
+
+	handlerFunc(ev)
 
 	return nil
 }

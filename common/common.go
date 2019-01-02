@@ -14,7 +14,9 @@ const (
 	WaitInput   = "wait"
 	InputWaited = "waited"
 
-	PageReset = "reset"
+	Page2Top = "page2top"
+
+	NaviHist = "navihist"
 )
 
 type Event struct {
