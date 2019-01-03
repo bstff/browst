@@ -1,9 +1,13 @@
 package main
 
-import "browst/ui"
-import "browst/common"
-import "browst/remoteChrome"
-import "fmt"
+import (
+	"browst/common"
+	"browst/remoteChrome"
+	"browst/ui"
+	"fmt"
+	"os"
+	"strings"
+)
 
 const (
 	width  = 1280
@@ -15,17 +19,17 @@ var (
 	screenshot_data = make(chan []byte)
 )
 
-func runCDP() {
+func runCDP(url string) {
+	if url == "" {
+		url = `https://www.baidu.com`
+	}
 
 	b := remoteChrome.NewWithViewSize(9223, width, height)
 
 	remoteChrome.SetWaitInputFunc(func(ev common.Event) {
 		handlerChromeEvent(ev)
 	})
-	// url := "http://192.168.0.156:8080"
-	// url := "http://www.bilibili.com"
-	url := "https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=0&rsv_idx=1&tn=baidu&wd=golang&rsv_pq=cc657c92000278a4&rsv_t=efebRYwNRIqUH76tr8pdIqkxrMqHTFSeU2jg9v7pL2Il33nuomqpiPSfO3k&rqlang=cn&rsv_enter=1&rsv_sug3=7&rsv_sug1=6&rsv_sug7=100&rsv_sug2=0&inputT=1832&rsv_sug4=2450"
-	// url := `https://www.2345.com/?39291`
+
 	b.Start(url)
 
 	screenshot_quit = make(chan struct{})
@@ -41,8 +45,14 @@ func runCDP() {
 }
 
 func main() {
-
-	runCDP()
+	url := ""
+	if len(os.Args) > 1 {
+		url = os.Args[1]
+		if strings.Index(url, "http://") != 0 {
+			url = "http://" + url
+		}
+	}
+	runCDP(url)
 	fmt.Println("quit")
 }
 

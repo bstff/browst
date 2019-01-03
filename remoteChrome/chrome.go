@@ -7,8 +7,6 @@ import (
 
 	"github.com/mafredri/cdp"
 
-	// "io/ioutil"
-	"strings"
 	"time"
 )
 
